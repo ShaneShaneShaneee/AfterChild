@@ -63,7 +63,7 @@ public class PlayerMovement : MonoBehaviour, IMovable
         bool jumpHold = Input.GetKey(KeyCode.Space);
         bool jumpReleased = Input.GetKeyUp(KeyCode.Space);
 
-        if (MaxCharge || (jumpReleased && transform.position.y > 0))
+        if (MaxCharge || (jumpReleased && !IsGrounded))
         {
             if (!IsFalling)
             {
@@ -71,6 +71,19 @@ public class PlayerMovement : MonoBehaviour, IMovable
                 LeanTween.value(UpDownMovement, -FallMultiplier, 0.15f).setOnUpdate((float value) => UpDownMovement = value);
             }
 
+        }
+
+        if (!IsGrounded && transform.position.y > 0f)
+        {
+            LeanTween.value(UpDownMovement, -FallMultiplier, 0.15f).setOnUpdate((float value) => UpDownMovement = value);
+        }
+
+        if (IsGrounded)
+        {
+            if (UpDownMovement < 0)
+            {
+                UpDownMovement = 0;
+            }
         }
 
         if (!IsGrounded && jumpHold && !MaxCharge)
@@ -92,7 +105,7 @@ public class PlayerMovement : MonoBehaviour, IMovable
         {
             Jump();
 
-            if (transform.position.y > 0)
+            if (IsGrounded)
             {
                 ControlText.text = "Space (2x) - Double Jump";
             }
@@ -177,10 +190,10 @@ public class PlayerMovement : MonoBehaviour, IMovable
     {
         if (!LeanTween.isTweening(gameObject))
         {
-            LeanTween.moveX(gameObject, (LeftRightMovement * DashValue), 0.25f).setEaseOutCubic();
+            LeanTween.moveX(gameObject, (LeftRightMovement * DashValue), 0.25f).setEaseOutSine();
         }
 
-        if (transform.position.y > 0)
+        if (!IsGrounded)
         {
             ControlText.text = "Space + LShift - Air Dash";
         }

@@ -351,7 +351,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.24576086, y: 0.24576086, z: 0.24576086}
+  m_LocalScale: {x: 0.1588721, y: 0.1588721, z: 0.1588721}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 313727222}
@@ -474,13 +474,13 @@ MonoBehaviour:
   MovementStats:
     MovementSpeed: 2
     RotationSpeed: 0
-    JumpForce: 10
+    JumpForce: 5
   ObjectModel: {fileID: 525765444}
   ObjectRigidbody: {fileID: 525765446}
   ObjectCollider: {fileID: 525765447}
   FallMultiplier: 0.5
   JumpCount: 0
-  DashValue: 2
+  DashValue: 1
   IsGrounded: 0
   CanDoubleJump: 0
   CanDash: 0

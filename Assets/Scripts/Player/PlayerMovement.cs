@@ -25,13 +25,23 @@ public class PlayerMovement : MonoBehaviour, IMovable
     float DashCooldown = 1f;
     float CurrentDashCooldown;
 
+    float TimeToClimb = 0.25f;
+    float CurrentTimeToClimb;
+
     bool MaxCharge;
     [SerializeField] bool IsGrounded = false;
     [SerializeField] bool CanDoubleJump = false;
     [SerializeField] bool CanDash = true;
+    [SerializeField] bool DisableDash = false;
+    [SerializeField] bool CanClimb = false;
+    [SerializeField] bool CanGoDown = false;
     bool IsFalling; 
 
     [SerializeField] TMP_Text ControlText;
+
+    [SerializeField] Transform PlatformTransform;
+    [SerializeField] Transform PlatformDownTransform;
+    
 
 
     // Start is called before the first frame update
@@ -171,9 +181,40 @@ public class PlayerMovement : MonoBehaviour, IMovable
             LeftRightMovement = 0;
         }
 
-        if (CanDash && Input.GetKeyDown(KeyCode.LeftShift)) //left shift for dash
+        if (!DisableDash)
         {
-            Dash();
+            if (CanDash && Input.GetKeyDown(KeyCode.LeftShift)) //left shift for dash
+            {
+                Dash();
+            }
+        }
+
+        if (CanClimb)
+        {
+            if (Input.GetKey(KeyCode.W))
+            {
+                CurrentTimeToClimb += Time.deltaTime;
+
+                if (CurrentTimeToClimb >= TimeToClimb)
+                {
+                    CurrentTimeToClimb = 0;
+                    PlatformClimb();
+                }
+            }
+        }
+
+        if (CanGoDown)
+        {
+            if (Input.GetKey(KeyCode.S))
+            {
+                CurrentTimeToClimb += Time.deltaTime;
+
+                if (CurrentTimeToClimb >= TimeToClimb)
+                {
+                    CurrentTimeToClimb = 0;
+                    PlatformClimb();
+                }
+            }
         }
     }
 
@@ -205,6 +246,55 @@ public class PlayerMovement : MonoBehaviour, IMovable
         CanDash = false;
     }
 
+    public void PlatformClimb()
+    {
+        if (CanClimb)
+        {
+            LeanTween.moveY(gameObject, PlatformTransform.position.y + 0.25f, 0.25f).setEaseOutSine();
+        }
+        else if (CanGoDown)
+        {
+            LeanTween.moveY(gameObject, PlatformDownTransform.position.y - 0.25f, 0.25f).setEaseOutSine();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Ground") && other.gameObject.layer == LayerMask.NameToLayer("Platform"))
+        {
+            if (other.gameObject.transform.position.y > transform.position.y)
+            {
+                Debug.Log("Platform Over Head");
+                CanClimb = true;
+                PlatformTransform = other.transform;
+            }
+            else
+            {
+                Debug.Log("Platform Down Standing");
+                CanGoDown = true;
+                PlatformDownTransform = other.transform;
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.CompareTag("Ground") && other.gameObject.layer == LayerMask.NameToLayer("Platform"))
+        {
+            if (other.gameObject.transform.position.y > transform.position.y)
+            {
+                Debug.Log("Platform Gone");
+                CanClimb = false;
+                PlatformTransform = null;
+            }
+            else
+            {
+                Debug.Log("Platform Down Gone");
+                CanGoDown = false;
+                PlatformDownTransform = null;
+            }
+        }
+    }
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -216,6 +306,11 @@ public class PlayerMovement : MonoBehaviour, IMovable
             MaxCharge = false;
             IsFalling = false;
         }
+
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Wall"))
+        {
+            DisableDash = true;
+        }
     }
 
     private void OnCollisionExit(Collision collision)
@@ -223,6 +318,11 @@ public class PlayerMovement : MonoBehaviour, IMovable
         if (collision.gameObject.CompareTag("Ground"))
         {
             IsGrounded = false;
+        }
+
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Wall"))
+        {
+            DisableDash = false;
         }
     }
 }

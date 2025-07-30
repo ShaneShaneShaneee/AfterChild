@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour, IMovable
 {
-    
+    public MovementStats MovementStats;
     // Start is called before the first frame update
     void Start()
     {
